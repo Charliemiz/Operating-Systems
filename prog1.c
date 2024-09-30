@@ -4,31 +4,32 @@
 #include <stdlib.h>
 
 // Global variables
-// holds running total of the natural log
+// Holds running total of the natural log
 double global_sum = 0.0; 
 
-// mutex ensures only one thread at a time can modify global_sum
+// Mutex ensures only one thread at a time can modify global_sum
 pthread_mutex_t lock;
 
-// Since we need to pass multiple pieces of info, we can just use a struct
+// Struct to pass multiple pieces of information to threads
 typedef struct {
     double x_minus_1;   // x-1 precalculated to decrease repetition
-    int thread_id;      // unique number for each thread
-    int num_threads;    // number threads being used
-    int iterations;     // number terms each thread must compute
+    int thread_id;      // Unique number for each thread
+    int num_threads;    // Number of threads being used
+    int iterations;     // Number of terms each thread must compute
 } thread_data_t;
 
+// Thread function to calculate ln(x)
 void* calculate_ln(void* arg) {
-    // Extract thread data from arugment 
-    // Perform calculations for each thread
-    // Mutex is used to safely update global_sum
+    // Extract thread data from argument 
     thread_data_t* data = (thread_data_t*) arg;
     double local_sum = 0.0;
 
+    // Each thread calculates its assigned terms
     for (int i = 0; i < data->iterations; i++) {
         int term_num = data->thread_id + i * data->num_threads + 1;
         double term = pow(data->x_minus_1, term_num) / term_num;
 
+        // Alternating sign for each term
         if (term_num % 2 == 0) {
             term = -term;
         }
@@ -46,28 +47,28 @@ void* calculate_ln(void* arg) {
 
 int main(int argc, char* argv[]) {
     // Check if 3 arguments are passed
-    // Parse those 3 arguments if so
     if (argc != 4) {
         printf("Usage: %s <value (0,2)> <Number of Threads> <Num of Iterations>\n", argv[0]);
         return 1;
     }
 
-    // Capture given arguments into variables below, 
-    // Made sure they are converted to the correct data type (float, int)
+    // Parse command-line arguments
     double x = atof(argv[1]);
     int num_threads = atoi(argv[2]);
     int iterations = atoi(argv[3]);     
 
+    // Validate input arguments
     if (x <= 0 || x >= 2 || num_threads < 1 || iterations < 1) {
-        printf("Invalid input, ensure: number to calculate is between 0 and 2, number of threads is greater than 0 and iterations / terms is greater than 0 as well!");
+        printf("Invalid input! Ensure: x is between 0 and 2, number of threads is greater than 0, and iterations are greater than 0.\n");
         return 1;
     }
 
     // Initialize the mutex lock to control access to global sum
-    pthread_mutext_init(&lock, NULL)
+    pthread_mutex_init(&lock, NULL);  // Fix: "pthread_mutext_init" -> "pthread_mutex_init"
 
-    pthread_t threads[num_threads]
-    thread_data_t thread_data[num_threads]
+    // Declare thread arrays
+    pthread_t threads[num_threads];  // Fix: Missing semicolon
+    thread_data_t thread_data[num_threads];  // Fix: Missing semicolon
 
     // Launching Threads...
     // Loop over number of threads and assign data for each thread in thread_data_t struct
@@ -87,13 +88,12 @@ int main(int argc, char* argv[]) {
         pthread_join(threads[i], NULL);
     }
     
-
-    // Output and cleanup...
-    // Output the calculated result and the math librarys result to confirm
+    // Output the calculated result and the math library's result to confirm
     printf("%.14f\n", global_sum);
     printf("%.14f\n", log(x));
 
     // Clean up the mutex
     pthread_mutex_destroy(&lock);
+
     return 0;
 }
