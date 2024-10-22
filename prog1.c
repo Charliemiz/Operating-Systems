@@ -1,3 +1,10 @@
+/** ***********************************************************************
+@file prog1.c
+@author Charlie Misbach
+@date October 7th, 2024
+@brief Programming Assignment #1
+*************************************************************************** */
+
 #include <pthread.h>
 #include <math.h>
 #include <stdio.h>
@@ -19,7 +26,7 @@ typedef struct {
 } thread_data_t;
 
 // Thread function to calculate ln(x)
-void* calculate_ln(void* arg) {
+void* thread_function(void* arg) {
     // Extract thread data from argument 
     thread_data_t* data = (thread_data_t*) arg;
     double local_sum = 0.0;
@@ -79,7 +86,7 @@ int main(int argc, char* argv[]) {
         thread_data[i].num_threads = num_threads;
         thread_data[i].iterations = iterations;
 
-        pthread_create(&threads[i], NULL, calculate_ln, &thread_data[i]);
+        pthread_create(&threads[i], NULL, thread_function, &thread_data[i]);
     }
 
     // Joining Threads...
